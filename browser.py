@@ -1,11 +1,27 @@
+import time
+import os
+
+# .env
+from dotenv import load_dotenv
+
+# Main library
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
-import time
 
-# path = r"/usr/bin/safaridriver"
+# WebDrive Chrome
+from selenium.webdriver.chrome.service import Service as ChromeService
+from webdriver_manager.chrome import ChromeDriverManager
 
-browser = webdriver.Safari()
+load_dotenv()
+
+browser_type = os.getenv("BROWSER")
+
+if browser_type == "S":
+    browser = webdriver.Safari()
+elif browser_type == "C":
+    browser = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+
 browser.maximize_window()
 browser.get("https://events.myrosmol.ru")
 print("Браузер открыт")
