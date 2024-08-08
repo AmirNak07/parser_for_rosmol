@@ -197,9 +197,22 @@ for i in range(len(soup.find_all("div", class_="catalog-section-item-base"))):
         # Конец заявки для календаря(снова к Вике) = заявка до
         "end_of_application": put_application(create_request(create_project_link(soup.find_all("div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True))))
     }
+
+    try:
+        if datetime.now() > datetime.strptime(cards[i]["application_before"], "%d.%m.%Y %X"):
+            del cards[i]
+    except ValueError:
+        pass
+
+result = {}
+
+for i in cards:
+    for j in range(len(cards)):
+        result[j] = cards[i]
+
 print("Готово")
 
 with open("rosmol_parsed.json", "w", encoding="utf-8") as file:
-    json.dump(cards, file, ensure_ascii=False, indent=4)
+    json.dump(result, file, ensure_ascii=False, indent=4)
 
 print("Результат записан в файл rosmol_parsed.json <3")
