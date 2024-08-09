@@ -6,6 +6,8 @@ import json
 from bs4 import BeautifulSoup
 import httpx
 from browser import html
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 soup = BeautifulSoup(html, "html.parser")
 
@@ -165,54 +167,68 @@ def create_month(date):
         return ", ".join(result)
 
 
-print("Процесс записи данных в JSON...")
-cards = {}
+def create_projects():
+    print("Процесс парсинга...")
+    cards = {}
 
-for i in range(len(soup.find_all("div", class_="catalog-section-item-base"))):
-    cards[i] = {
-        # Название
-        "title": " ".join(soup.find_all("div", class_="catalog-section-item-name")[i].text.split()),
+    for i in range(len(soup.find_all("div", class_="catalog-section-item-base"))):
+        cards[i] = {
+            # Название
+            "title": " ".join(soup.find_all("div", class_="catalog-section-item-name")[i].text.split()),
 
-        # Место
-        "place": " ".join(soup.find_all("div", class_="catalog-section-forum-region")[i].text.split()),
+            # Место
+            "place": " ".join(soup.find_all("div", class_="catalog-section-forum-region")[i].text.split()),
 
-        # Даты
-        "date": soup.find_all("div", class_="period-event-tile-date")[i].text,
+            # Даты
+            "date": soup.find_all("div", class_="period-event-tile-date")[i].text,
 
-        # Заявка до
-        "application_before": put_application(create_request(create_project_link(soup.find_all("div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True)))),
+            # Заявка до
+            "application_before": put_application(create_request(create_project_link(soup.find_all("div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True)))),
 
-        # Категория участников
-        "category_of_participants": put_categories(create_request(create_project_link(soup.find_all("div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True)))).replace("\r", "").replace("\n", ""),
+            # Категория участников
+            "category_of_participants": put_categories(create_request(create_project_link(soup.find_all("div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True)))).replace("\r", "").replace("\n", ""),
 
-        # Ссылка не проект
-        "project_link": create_project_link(soup.find_all("div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True)),
+            # Ссылка не проект
+            "project_link": create_project_link(soup.find_all("div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True)),
 
-        # Проекты по месяцам(исходя из даты, надо обговорить с Викой) - гемор
-        "month_of_project": create_month(str(soup.find_all("div", class_="period-event-tile-date")[i].text)),
+            # Проекты по месяцам
+            "month_of_project": create_month(str(soup.find_all("div", class_="period-event-tile-date")[i].text)),
 
-        # Платформа
-        "platform": "Росмолодежь",
+            # Платформа
+            "platform": "Росмолодежь",
 
-        # Конец заявки для календаря(снова к Вике) = заявка до
-        "end_of_application": put_application(create_request(create_project_link(soup.find_all("div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True))))
-    }
+            # Конец заявки для календаря = заявка до
+            "end_of_application": put_application(create_request(create_project_link(soup.find_all("div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True))))
+        }
 
-    try:
-        if datetime.now() > datetime.strptime(cards[i]["application_before"], "%d.%m.%Y %X"):
-            del cards[i]
-    except ValueError:
-        pass
+        try:
+            if datetime.now() > datetime.strptime(cards[i]["application_before"], "%d.%m.%Y %X"):
+                del cards[i]
+        except ValueError:
+            pass
 
-result = {}
+    print("Мероприятия отсортированы")
 
-for i in cards:
-    for j in range(len(cards)):
-        result[j] = cards[i]
+    result = {}
 
-print("Готово")
+    for i in cards:
+        for j in range(len(cards)):
+            result[j] = cards[i]
 
-with open("rosmol_parsed.json", "w", encoding="utf-8") as file:
-    json.dump(result, file, ensure_ascii=False, indent=4)
+    print("Мероприятия готовы")
+    return result
 
-print("Результат записан в файл rosmol_parsed.json <3")
+
+def write_to_file(data):
+    with open("rosmol_parsed.json", "w", encoding="utf-8") as file:
+        json.dump(data, file, ensure_ascii=False, indent=4)
+    
+    print("Результат записан в JSON файл")
+
+
+def main():
+    write_to_file(create_projects())
+
+
+if __name__ == "__main__":
+    main()
