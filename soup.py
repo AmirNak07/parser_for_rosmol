@@ -1,23 +1,24 @@
 from datetime import datetime
 from re import fullmatch
-import json
-
+import os
 
 from bs4 import BeautifulSoup
 import httpx
 from browser import html
 import gspread
+from gspread.client import Client
 from oauth2client.service_account import ServiceAccountCredentials
+from dotenv import load_dotenv
 
 soup = BeautifulSoup(html, "html.parser")
 
 
-def create_project_link(a):
-    a = str(a).split()[1].replace('href="', "").replace('">', "")
-    return "https://events.myrosmol.ru" + a
+def create_project_link(link: str) -> str:
+    link = str(link).split()[1].replace('href="', "").replace('">', "")
+    return "https://events.myrosmol.ru" + link
 
 
-def create_request(link):
+def create_request(link: str) -> str:
     response = httpx.get(link)
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, "html.parser")
@@ -29,7 +30,7 @@ def create_request(link):
         return all_info
 
 
-def put_application(response):
+def put_application(response: str) -> str:
     date_to_num = {
         "января": 1,
         "февраля": 2,
@@ -54,14 +55,14 @@ def put_application(response):
     return "-"
 
 
-def put_categories(response):
+def put_categories(response: str) -> str:
     for i in response:
         if i[0] == "Категории участников:":
             return i[1]
     return "-"
 
 
-def create_month(date):
+def create_month(my_date: str) -> str:
     date_to_num = {
         "января": 1,
         "февраля": 2,
@@ -76,7 +77,7 @@ def create_month(date):
         "ноября": 11,
         "декабря": 12
     }
-    
+
     correct_date_to_num = {
         "январь": 1,
         "февраль": 2,
@@ -91,7 +92,7 @@ def create_month(date):
         "ноябрь": 11,
         "декабрь": 12
     }
-    
+
     num_to_month = {
         1: "январь",
         2: "февраль",
@@ -106,12 +107,13 @@ def create_month(date):
         11: "ноябрь",
         12: "декабрь"
     }
-    
-    date = date.replace("–", "-")
-    
-    format1 = fullmatch(r"\d{1,2} \D+ - \d{1,2} \D+", date) # 4 октября - 1 ноября
-    format2 = fullmatch(r"\D+ - \D+", date) # июнь - октябрь
-    format3 = fullmatch(r"\d{1,2} - \d{1,2} \D+", date) # 20 - 23 ноября
+
+    my_date = my_date.replace("–", "-")
+
+    format1 = fullmatch(r"\d{1,2} \D+ - \d{1,2} \D+",
+                        my_date)  # 4 октября - 1 ноября
+    format2 = fullmatch(r"\D+ - \D+", my_date)  # июнь - октябрь
+    format3 = fullmatch(r"\d{1,2} - \d{1,2} \D+", my_date)  # 20 - 23 ноября
 
     month = []
     result = []
@@ -122,7 +124,7 @@ def create_month(date):
 
     # Для даты формата "4 сентября - 1 ноября"
     if format1 is not None:
-        for i in date.split(" - "):
+        for i in my_date.split(" - "):
             day, months = i.split()
             months = date_to_num[months]
             if month != [] and day == "1":
@@ -133,33 +135,31 @@ def create_month(date):
 
         if month[0] > month[1]:
             month[1] += 12
-        
+
         for i in range(month[0], month[1] + 1):
             if i <= 12:
                 result.append(num_to_month[i])
             else:
                 result.append(num_to_month[i % 12])
 
-    
     # Для даты формата "июнь - сентябрь"
     if format2 is not None:
-        month = date.split(" - ")
+        month = my_date.split(" - ")
         month[0] = correct_date_to_num[month[0]]
         month[1] = correct_date_to_num[month[1]]
-        
+
         if month[0] > month[1]:
             month[1] += 12
-        
+
         for i in range(month[0], month[1] + 1):
             if i <= 12:
                 result.append(num_to_month[i])
             else:
                 result.append(num_to_month[i % 12])
-
 
     # Для даты формата "20 - 23 ноября"
     if format3 is not None:
-        result.append(num_to_month[date_to_num[date.split()[-1]]])
+        result.append(num_to_month[date_to_num[my_date.split()[-1]]])
 
     if len(result) == 1:
         return result[0]
@@ -167,67 +167,146 @@ def create_month(date):
         return ", ".join(result)
 
 
-def create_projects():
-    print("Процесс парсинга...")
-    cards = {}
-
-    for i in range(len(soup.find_all("div", class_="catalog-section-item-base"))):
-        cards[i] = {
-            # Название
-            "title": " ".join(soup.find_all("div", class_="catalog-section-item-name")[i].text.split()),
-
-            # Место
-            "place": " ".join(soup.find_all("div", class_="catalog-section-forum-region")[i].text.split()),
-
-            # Даты
-            "date": soup.find_all("div", class_="period-event-tile-date")[i].text,
-
-            # Заявка до
-            "application_before": put_application(create_request(create_project_link(soup.find_all("div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True)))),
-
-            # Категория участников
-            "category_of_participants": put_categories(create_request(create_project_link(soup.find_all("div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True)))).replace("\r", "").replace("\n", ""),
-
-            # Ссылка не проект
-            "project_link": create_project_link(soup.find_all("div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True)),
-
-            # Проекты по месяцам
-            "month_of_project": create_month(str(soup.find_all("div", class_="period-event-tile-date")[i].text)),
-
-            # Платформа
-            "platform": "Росмолодежь",
-
-            # Конец заявки для календаря = заявка до
-            "end_of_application": put_application(create_request(create_project_link(soup.find_all("div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True))))
-        }
-
-        try:
-            if datetime.now() > datetime.strptime(cards[i]["application_before"], "%d.%m.%Y %X"):
-                del cards[i]
-        except ValueError:
-            pass
-
-    print("Мероприятия отсортированы")
-
-    result = {}
+def delete_old_projects(cards):
+    titles = ["title", "place", "date", "application_before", "category_of_participants",
+              "project_link", "month_of_project", "platform", "end_of_application"]
+    result = [titles]
 
     for i in cards:
-        for j in range(len(cards)):
-            result[j] = cards[i]
+        try:
+            if datetime.now() > datetime.strptime(i[3], "%d.%m.%Y %X"):
+                pass
+            else:
+                result.append(i)
+        except ValueError:
+            result.append(i)
+
+    return result
+
+
+def create_projects() -> list:
+    print("Процесс парсинга...")
+    cards = []
+    card = []
+
+    for i in range(len(soup.find_all("div", class_="catalog-section-item-base"))):
+        # Название
+        card.append(" ".join(soup.find_all(
+            "div", class_="catalog-section-item-name")[i].text.split()))
+
+        # Место
+        card.append(" ".join(soup.find_all(
+            "div", class_="catalog-section-forum-region")[i].text.split()))
+
+        # Даты
+        card.append(soup.find_all(
+            "div", class_="period-event-tile-date")[i].text)
+
+        # Заявка до
+        card.append(put_application(create_request(create_project_link(soup.find_all(
+            "div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True)))))
+
+        # Категория участников
+        card.append(put_categories(create_request(create_project_link(soup.find_all("div", class_="catalog-section-item-name")
+                    [i].findChildren("a", recursive=False, href=True)))).replace("\r", "").replace("\n", ""))
+
+        # Ссылка не проект
+        card.append(create_project_link(soup.find_all(
+            "div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True)))
+
+        # Проекты по месяцам
+        card.append(create_month(
+            str(soup.find_all("div", class_="period-event-tile-date")[i].text)))
+
+        # Платформа
+        card.append("Росмолодежь")
+
+        # Конец заявки для календаря = заявка до
+        card.append(put_application(create_request(create_project_link(soup.find_all(
+            "div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True)))))
+
+        cards.append(card.copy())
+        card.clear()
+
+    result = delete_old_projects(cards)
 
     print("Мероприятия готовы")
     return result
 
 
-def write_to_file(data):
-    with open("rosmol_parsed.json", "w", encoding="utf-8") as file:
-        json.dump(data, file, ensure_ascii=False, indent=4)
-    
-    print("Результат записан в JSON файл")
+# def download_csv_from_table(client: Client, key: str, work_sheet: str) -> list:
+#     print("Установка старой таблицы")
+#     sheet = client.open_by_key(key)
+#     worksheet = sheet.worksheet(work_sheet)
+#     data = worksheet.get_all_records()
+
+#     cards = []
+#     for project in data:
+#         fields = []
+#         for field in list(project.values()):
+#             fields.append(field)
+#         cards.append(fields.copy())
+
+#     result = delete_old_projects(cards)
+#     return result
 
 
-def main():
-    write_to_file(create_projects())
+# def update_table(old_csv, new_csv):
+#     print("Сортировка данных в таблице")
+#     titles = old_csv.pop(0)
+#     link = titles.index("project_link")
+#     application_before = titles.index("application_before")
+#     new_csv.pop(0)
+#     result = []
+#     if len(old_csv) == 0:
+#         result.extend(new_csv)
+#         return result
+
+#     result = [tuple(titles)]
+
+#     for new in range(len(new_csv)):
+#         for old in range(len(old_csv)):
+#             if new_csv[new][link] == old_csv[old][link]:
+#                 if new_csv[new][application_before] != old_csv[old][application_before]:
+#                     old_csv[old][application_before] = new_csv[new][application_before]
+#                     result.append(tuple(old))
+#                     break
+
+#     for old in old_csv:
+#         result.append(tuple(old))
+
+#     for new in new_csv:
+#         result.append(tuple(new))
+
+#     result = list(set(tuple(result)))
+#     print(result)
+#     return result
+
+
+def write_to_table(client: Client, table_id: str, worklist: str, data: str) -> None:
+    sheet = client.open_by_key(table_id)
+    worksheet = sheet.worksheet(worklist)
+    worksheet.clear()
+    worksheet.append_rows(values=data)
+
+
+def main() -> None:
+    load_dotenv()
+    id_table = os.getenv("ID_TABLE")
+    name_worksheet = os.getenv("SPREADSHEET")
+
+    scope = [
+        "https://spreadsheets.google.com/feeds",
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/drive"
+    ]
+
+    creds = ServiceAccountCredentials.from_json_keyfile_name(
+        "credentials.json", scope)
+    client = gspread.authorize(creds)
+
+    new_csv = create_projects()
+    write_to_table(client, id_table, name_worksheet, new_csv)
 
 
 if __name__ == "__main__":
