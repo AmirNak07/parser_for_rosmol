@@ -61,7 +61,9 @@
     Создать файл ".env" и заполнить его по примеру из файла ".env.example" (Нужно скопировать только те строки, которые НЕ начинаются с "#"). Пример файла ".env", если мы используем Chrome:
 
     ```env
-    BROWSER = "C"
+    BROWSER =C
+    ID_TABLE=2434242_fasdkljklfsa_kljfdkj;-41dsggas
+    SPREADSHEET=Лист1
     ```
 
 ## Запуск
