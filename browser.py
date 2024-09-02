@@ -8,10 +8,11 @@ from selenium.common.exceptions import NoSuchElementException
 # WebDrive Chrome
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.core.os_manager import ChromeType
 
 # WebDrive Chrome for Server
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service as ChromiumService
+from webdriver_manager.core.os_manager import ChromeType
 
 from config import BROWSER_TYPE
 
@@ -29,7 +30,7 @@ def choose_browser(browser_type):
         options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
-        browser = webdriver.Chrome(service=ChromeService(
+        browser = webdriver.Chrome(service=ChromiumService(
             ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install()), options=options)
     return browser
 
