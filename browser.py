@@ -13,16 +13,25 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 
+# WebDrive Chrome for Server
+from selenium.webdriver.chrome.options import Options
+
 load_dotenv()
 
-browser_type = os.getenv("BROWSER")
+browser_type = os.environ.get("BROWSER")
 
 if browser_type == "S":
     browser = webdriver.Safari()
 elif browser_type == "C":
     browser = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+elif browser_type == "C-Server":
+    options = Options()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
 
-browser.maximize_window()
+    browser = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+
 browser.get("https://events.myrosmol.ru")
 print("Браузер открыт")
 
