@@ -1,8 +1,4 @@
 import time
-import os
-
-# .env
-from dotenv import load_dotenv
 
 # Main library
 from selenium import webdriver
@@ -16,15 +12,13 @@ from webdriver_manager.chrome import ChromeDriverManager
 # WebDrive Chrome for Server
 from selenium.webdriver.chrome.options import Options
 
-load_dotenv()
+from config import BROWSER_TYPE
 
-browser_type = os.environ.get("BROWSER")
-
-if browser_type == "S":
+if BROWSER_TYPE == "S":
     browser = webdriver.Safari()
-elif browser_type == "C":
+elif BROWSER_TYPE == "C":
     browser = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
-elif browser_type == "C-Server":
+elif BROWSER_TYPE == "C-Server":
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--no-sandbox')
