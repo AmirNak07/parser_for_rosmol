@@ -1,6 +1,5 @@
 from datetime import datetime
 from re import fullmatch
-import os
 import time
 
 from bs4 import BeautifulSoup
@@ -9,10 +8,9 @@ from browser import html
 import gspread
 from gspread.client import Client
 from oauth2client.service_account import ServiceAccountCredentials
-from dotenv import load_dotenv
 import schedule
 
-soup = BeautifulSoup(html, "html.parser")
+from config import ID_TABLE, NAME_SPREADSHEET
 
 
 def create_project_link(link: str) -> str:
@@ -186,7 +184,7 @@ def delete_old_projects(cards):
     return result
 
 
-def create_projects() -> list:
+def create_projects(soup) -> list:
     print("Процесс парсинга...")
     cards = []
     card = []
@@ -293,9 +291,10 @@ def write_to_table(client: Client, table_id: str, worklist: str, data: str) -> N
 
 
 def main() -> None:
-    load_dotenv()
-    id_table = os.getenv("ID_TABLE")
-    name_worksheet = os.getenv("SPREADSHEET")
+    id_table = ID_TABLE
+    name_worksheet = NAME_SPREADSHEET
+
+    soup = BeautifulSoup(html, "html.parser")
 
     scope = [
         "https://spreadsheets.google.com/feeds",
@@ -307,7 +306,7 @@ def main() -> None:
         "credentials.json", scope)
     client = gspread.authorize(creds)
 
-    new_csv = create_projects()
+    new_csv = create_projects(soup)
     write_to_table(client, id_table, name_worksheet, new_csv)
 
 
