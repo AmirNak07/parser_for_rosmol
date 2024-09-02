@@ -4,7 +4,7 @@ import time
 
 from bs4 import BeautifulSoup
 import httpx
-from browser import html
+from browser import run_parsing
 import gspread
 from gspread.client import Client
 from oauth2client.service_account import ServiceAccountCredentials
@@ -294,7 +294,7 @@ def main() -> None:
     id_table = ID_TABLE
     name_worksheet = NAME_SPREADSHEET
 
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(run_parsing(), "html.parser")
 
     scope = [
         "https://spreadsheets.google.com/feeds",
