@@ -308,6 +308,7 @@ def main() -> None:
 
     new_csv = create_projects(soup)
     write_to_table(client, id_table, name_worksheet, new_csv)
+    print("-" * 50)
 
 
 if __name__ == "__main__":
