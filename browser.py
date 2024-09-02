@@ -16,8 +16,10 @@ from config import BROWSER_TYPE
 
 if BROWSER_TYPE == "S":
     browser = webdriver.Safari()
+    browser.maximize_window()
 elif BROWSER_TYPE == "C":
     browser = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
+    browser.maximize_window()
 elif BROWSER_TYPE == "C-Server":
     options = Options()
     options.add_argument('--headless')
