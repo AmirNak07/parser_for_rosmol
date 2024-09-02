@@ -1,6 +1,7 @@
 from datetime import datetime
 from re import fullmatch
 import os
+import time
 
 from bs4 import BeautifulSoup
 import httpx
@@ -9,6 +10,7 @@ import gspread
 from gspread.client import Client
 from oauth2client.service_account import ServiceAccountCredentials
 from dotenv import load_dotenv
+import schedule
 
 soup = BeautifulSoup(html, "html.parser")
 
@@ -310,4 +312,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    # schedule.every().day.at("00:01", "Europe/Moscow").do(timer)
+    schedule.every(3).hours.do(main)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
