@@ -1,4 +1,7 @@
+import time
+
 import gspread
+import schedule
 from oauth2client.service_account import ServiceAccountCredentials
 
 from config import ID_TABLE, NAME_SPREADSHEET
@@ -27,4 +30,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    # schedule.every().day.at("00:01", "Europe/Moscow").do(timer)
+    schedule.every(3).hours.do(main)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
