@@ -10,6 +10,9 @@ def create_projects(html: str) -> list:
     cards = []
     card = []
 
+    if soup.find_all("div", class_="catalog-section-item-base") == []:
+        return []
+
     for i in range(len(soup.find_all("div", class_="catalog-section-item-base"))):
         # Название
         card.append(" ".join(soup.find_all(
