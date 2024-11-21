@@ -44,7 +44,7 @@
 Создание образа:
 
 ```bash
-docker build --no-cache --platform linux/amd64 -t rosmol_parser_image . 
+docker build -t rosmol_parser_image . 
 ```
 
 Запуск образа:

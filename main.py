@@ -27,6 +27,8 @@ def main() -> None:
     handled_html = create_projects(html)
     write_to_table(client, id_table, name_worksheet, handled_html)
     print("Готово")
+    print(time.strftime("%d.%m.%Y %H:%M:%S", time.localtime()))
+    print("-" * 50)
 
 
 if __name__ == "__main__":
