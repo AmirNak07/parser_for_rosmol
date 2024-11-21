@@ -2,6 +2,7 @@ from gspread.client import Client
 
 from utils import delete_old_projects
 
+
 def download_csv_from_table(client: Client, key: str, work_sheet: str) -> list:
     print("Установка старой таблицы")
     sheet = client.open_by_key(key)

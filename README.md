@@ -48,6 +48,7 @@ docker build -t rosmol_parser_image .
 ```
 
 Запуск образа:
+
 ```bash
 docker run -d -p 443:4000 --env-file .env --name rosmol_parser rosmol_parser_image:latest 
 ```

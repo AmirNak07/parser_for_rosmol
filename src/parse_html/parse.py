@@ -7,10 +7,10 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.firefox.service import Service as FirefoxService
 
+
 def parse_html():
     display = Display(visible=0, size=(800, 600))
     display.start()
-
 
     options = FirefoxOptions()
     options.add_argument("--headless")
@@ -47,4 +47,3 @@ def parse_html():
     print("Браузер закрыт")
     print("-" * 50)
     return html
-

@@ -4,7 +4,7 @@ from utils import (create_project_link, create_request, put_application, put_cat
                    create_month, delete_old_projects)
 
 
-def create_projects(html: str)-> list:
+def create_projects(html: str) -> list:
     soup = BeautifulSoup(html, "html.parser")
     print("Процесс парсинга...")
     cards = []

@@ -1,6 +1,7 @@
 import httpx
 from bs4 import BeautifulSoup
 
+
 def create_request(link: str) -> str:
     response = httpx.get(link)
     if response.status_code == 200:
