@@ -28,7 +28,7 @@
 
 2. Настроить перменные среды
 
-    Создать файл ".env" и заполнить его по примеру из файла ".env.example" (Нужно скопировать только те строки, которые НЕ начинаются с "#"). Пример файла ".env", если мы используем Chrome:
+    Создать файл ".env" в папке config и заполнить его по примеру из файла ".env.example". Пример файла ".env":
 
     ```env
     ID_TABLE=2434242_fasdkljklfsa_kljfdkj;-41dsggas
@@ -50,7 +50,7 @@ docker build -t rosmol_parser_image .
 Запуск образа:
 
 ```bash
-docker run -d -p 443:4000 --env-file .env --name rosmol_parser rosmol_parser_image:latest 
+docker run -d -p 443:4000 --name rosmol_parser rosmol_parser_image:latest 
 ```
 
 Примечание: Данная версия работает с браузером Firefox
