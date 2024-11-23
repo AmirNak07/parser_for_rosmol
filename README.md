@@ -50,7 +50,7 @@ docker build -t rosmol_parser_image .
 Запуск образа:
 
 ```bash
-docker run -d -p 443:4000 --name rosmol_parser rosmol_parser_image:latest 
+docker run -d --name rosmol_parser rosmol_parser_image:latest 
 ```
 
 Примечание: Данная версия работает с браузером Firefox
