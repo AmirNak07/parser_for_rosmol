@@ -3,12 +3,12 @@
         {
             "sink": "sys.stdout",
             "level": "INFO",
-            "format": "{time} | {level} | {message}"
+            "format": "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level} | {message}"
         },
         {
             "sink": "logs/log_{time}.log",
             "level": "DEBUG",
-            "format": "{time} | {level} | {module} | {message}",
+            "format": "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level} | {message}",
             "rotation": "1 week",
             "retention": "1 month",
             "compression": "zip"
