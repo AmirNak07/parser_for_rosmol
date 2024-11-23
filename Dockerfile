@@ -10,4 +10,4 @@ apk add firefox geckodriver xvfb
 
 COPY . .
 
-CMD [ "python", "main.py" ]
+CMD [ "python", "-u", "main.py" ]
