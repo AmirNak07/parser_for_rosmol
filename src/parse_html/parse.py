@@ -1,3 +1,5 @@
+from time import sleep
+
 from loguru import logger
 from pyvirtualdisplay import Display
 from selenium.common.exceptions import NoSuchElementException
@@ -18,23 +20,21 @@ def parse_html():
 
     browser.get("https://events.myrosmol.ru")
     logger.debug("Браузер открыт")
-
-    browser.implicitly_wait(2)
-
+    sleep(2)
     browser.execute_script("window.scrollTo(0, 700)")
-    browser.implicitly_wait(2)
+    sleep(2)
     browser.find_element(
         By.XPATH, '//*[@id="i-9-bitrix-catalog-smart-filter-horizontal-1m-KZ7kpsh6etqY"]/div/div/div/div/form/div[3]/div[1]/div/div[3]/div[2]/div/div[1]/div/label').click()
     logger.debug("Фильтр применён")
-    browser.implicitly_wait(2)
+    sleep(2)
 
     try:
         while True:
-            browser.implicitly_wait(1.5)
+            sleep(1.5)
             button = browser.find_element(
                 By.XPATH, '//*[@id="i-11-bitrix-catalog-section-catalog-tile-3rm-OQ3k9PHlVICg"]/div[2]/div/div')
             browser.execute_script("arguments[0].scrollIntoView();", button)
-            browser.implicitly_wait(1.5)
+            sleep(1.5)
             button.click()
     except NoSuchElementException:
         pass
