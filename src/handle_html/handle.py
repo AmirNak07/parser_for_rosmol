@@ -1,19 +1,32 @@
 from bs4 import BeautifulSoup
+from loguru import logger
 
-from utils import (create_project_link, create_request, put_application, put_categories,
-                   create_month, delete_old_projects)
+from utils import (
+    create_month,
+    create_project_link,
+    create_request,
+    delete_old_projects,
+    put_application,
+    put_categories,
+)
 
 
+@logger.catch
 def create_projects(html: str) -> list:
     soup = BeautifulSoup(html, "html.parser")
-    print("Процесс парсинга...")
+    logger.debug("Процесс парсинга...")
     cards = []
     card = []
 
     if soup.find_all("div", class_="catalog-section-item-base") == []:
-        return []
+        logger.warning("Не было найдено ни одно мероприятие")
+        return [["title", "place", "date", "application_before", "category_of_participants",
+                 "project_link", "month_of_project", "platform", "end_of_application"]]
 
     for i in range(len(soup.find_all("div", class_="catalog-section-item-base"))):
+        logger.debug(f"Поиск информации в сайте: {create_project_link(soup.find_all(
+            "div", class_="catalog-section-item-name")[i].findChildren("a", recursive=False, href=True))}")
+
         # Название
         card.append(" ".join(soup.find_all(
             "div", class_="catalog-section-item-name")[i].text.split()))
@@ -54,5 +67,5 @@ def create_projects(html: str) -> list:
 
     result = delete_old_projects(cards)
 
-    print("Мероприятия готовы")
+    logger.debug(f"Мероприятия готовы: {result}")
     return result

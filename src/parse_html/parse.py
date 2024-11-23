@@ -6,8 +6,10 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.firefox.service import Service as FirefoxService
+from loguru import logger
 
 
+@logger.catch
 def parse_html():
     display = Display(visible=0, size=(800, 600))
     display.start()
@@ -17,14 +19,14 @@ def parse_html():
     browser = Firefox(service=FirefoxService(executable_path="/usr/bin/geckodriver"), options=options)
 
     browser.get("https://events.myrosmol.ru")
-    print("Браузер открыт")
+    logger.debug("Браузер открыт")
 
     time.sleep(2)
     browser.execute_script("window.scrollTo(0, 700)")
     time.sleep(2)
     browser.find_element(
         By.XPATH, '//*[@id="i-9-bitrix-catalog-smart-filter-horizontal-1m-KZ7kpsh6etqY"]/div/div/div/div/form/div[3]/div[1]/div/div[3]/div[2]/div/div[1]/div/label').click()
-    print("Фильтр применён")
+    logger.debug("Фильтр применён")
     time.sleep(2)
 
     try:
@@ -38,12 +40,11 @@ def parse_html():
     except NoSuchElementException:
         pass
 
-    print("Все старнички открыты")
+    logger.debug("Все старнички открыты")
     html = browser.page_source
-    print("HTML Сохранён")
+    logger.debug("HTML Сохранён")
     time.sleep(5)
     browser.close()
     display.stop()
-    print("Браузер закрыт")
-    print("-" * 50)
+    logger.debug("Браузер закрыт")
     return html

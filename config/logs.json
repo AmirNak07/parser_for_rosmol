@@ -1,0 +1,17 @@
+{
+    "handlers": [
+        {
+            "sink": "sys.stdout",
+            "level": "DEBUG",
+            "format": "{time} | {level} | {message}"
+        },
+        {
+            "sink": "logs/log_{time}.log",
+            "level": "DEBUG",
+            "format": "{time} | {level} | {module} | {message}",
+            "rotation": "1 week",
+            "retention": "1 month",
+            "compression": "zip"
+        }
+    ]
+}
