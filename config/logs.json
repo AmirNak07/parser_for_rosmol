@@ -2,7 +2,7 @@
     "handlers": [
         {
             "sink": "sys.stdout",
-            "level": "DEBUG",
+            "level": "INFO",
             "format": "{time} | {level} | {message}"
         },
         {
