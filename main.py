@@ -38,7 +38,7 @@ def main() -> None:
 
 if __name__ == "__main__":
     # schedule.every().day.at("00:01", "Europe/Moscow").do(main)
-    schedule.every(2).minutes.do(main)
+    schedule.every(3).hours.do(main)
     while True:
         schedule.run_pending()
         time.sleep(1)
