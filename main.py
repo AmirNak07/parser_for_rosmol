@@ -26,7 +26,7 @@ def main() -> None:
     ]
 
     creds = ServiceAccountCredentials.from_json_keyfile_name(
-        "credentials.json", scope)
+        "config/credentials.json", scope)
     client = gspread.authorize(creds)
 
     logger.info("Начало парсинга")
