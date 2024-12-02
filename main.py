@@ -11,11 +11,12 @@ from src.handle_html import create_projects
 from src.parse_html import parse_html
 
 
+logger.remove()
+logger.configure(**LOGS_CONFIG)
+
+
 @logger.catch(level="ERROR")
 def main() -> None:
-    logger.remove()
-    logger.configure(**LOGS_CONFIG)
-
     id_table = ID_TABLE
     name_worksheet = NAME_SPREADSHEET
 
