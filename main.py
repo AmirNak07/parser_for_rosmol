@@ -1,12 +1,26 @@
 import asyncio
+import time
 
 import httpx
+import schedule
 from httpx import AsyncClient
 from loguru import logger
 
-from config import ROSMOL_FORUMS_PATH, ROSMOL_FORUMS_URL, ROSMOL_FORUMS_PARAM, SPREADSHEET_ID, SHEET_NAME, LOGS_CONFIG
-from utils import get_forums, handle_forum, request_html, authorize_google_sheets, write_to_google_sheet
-
+from config import (
+    LOGS_CONFIG,
+    ROSMOL_FORUMS_PARAM,
+    ROSMOL_FORUMS_PATH,
+    ROSMOL_FORUMS_URL,
+    SHEET_NAME,
+    SPREADSHEET_ID,
+)
+from utils import (
+    authorize_google_sheets,
+    get_forums,
+    handle_forum,
+    request_html,
+    write_to_google_sheet,
+)
 
 logger.remove()
 logger.configure(**LOGS_CONFIG)
@@ -38,5 +52,14 @@ async def main():
     logger.info("End parsing")
 
 
-if __name__ == "__main__":
+def run():
     asyncio.run(main())
+
+
+if __name__ == "__main__":
+    schedule.every(3).hours.do(run)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+    # run()
