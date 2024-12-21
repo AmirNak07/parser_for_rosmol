@@ -2,8 +2,8 @@ from httpx import AsyncClient
 from bs4 import BeautifulSoup
 
 
-async def request_html(client: AsyncClient, url: str) -> str:
-    request = await client.get(url)
+async def request_html(client: AsyncClient, url: str, params: dict = None) -> str:
+    request = await client.get(url, params=params)
     if request.status_code != 200:
         request.raise_for_status()
 
