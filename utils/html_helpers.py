@@ -76,33 +76,33 @@ def create_month(my_date: str) -> str:
     re_1 = r"(январь|февраль|март|апрель|май|июнь|июль|август|сентябрь|октябрь|ноябрь|декабрь) \d{4}"
     format1 = fullmatch(re_1, my_date)  # Сентябрь 2025
 
-    re_2 = r"(январь|февраль|март|апрель|май|июнь|июль|август|сентябрь|октябрь|ноябрь|декабрь) ?- ?(январь|февраль|март|апрель|май|июнь|июль|август|сентябрь|октябрь|ноябрь|декабрь) ?\d*"
+    re_2 = r"(январь|февраль|март|апрель|май|июнь|июль|август|сентябрь|октябрь|ноябрь|декабрь)-(январь|февраль|март|апрель|май|июнь|июль|август|сентябрь|октябрь|ноябрь|декабрь) ?\d*"
     format2 = fullmatch(re_2, my_date)  # Июнь-сентябрь 2025, Июнь-Сентябрь 2025, июнь-сентябрь 2025, июнь-Сентябрь 2025
+
+    re_3 = r"(январь|февраль|март|апрель|май|июнь|июль|август|сентябрь|октябрь|ноябрь|декабрь) - (январь|февраль|март|апрель|май|июнь|июль|август|сентябрь|октябрь|ноябрь|декабрь) ?\d*"
+    format3 = fullmatch(re_3, my_date)  # Июнь - сентябрь 2025, Июнь - Сентябрь 2025, июнь - сентябрь 2025, июнь - Сентябрь 2025
 
     result = []
 
-    formats = list(map(lambda x: bool(x), [format1, format2]))
-
-    # Для дат других форматов
-    if all(formats):
+    formats = list(map(lambda x: bool(x), [format1, format2, format3]))
+    if formats == [False, False, False]:
         return "-"
 
     if formats[0]:
         result.append(months[correct_date_to_num[my_date.split(" ")[0]] - 1])
-    elif formats[1]:
-        dates = my_date.split(" - ")
-        if len(dates) == 1:
-            dates = my_date.split("-")
-            if bool(fullmatch(r"\D* \d{4}", dates[1])):
-                dates[1] = dates[1][:-5]
-
+    elif formats[1] or formats[2]:
+        if formats[1]:
+            dates = my_date.split(" ")[0].split("-")
+        elif formats[2]:
+            dates = my_date[:-5].split(" - ")
         dates = list(map(lambda x: correct_date_to_num[x], dates))
         if dates[0] <= dates[1]:
-            result.append(months[dates[0] - 1:dates[1]])
+            result.extend(months[dates[0] - 1:dates[1]])
         else:
-            result.append(months[dates[0] - 1:] + months[:dates[1]])
+            result.extend(months[dates[0] - 1:] + months[:dates[1]])
 
-    if isinstance(result[0], str):
+    if len(result) == 1:
         return result[0].title()
     else:
-        return ", ".join(result[0]).title()
+        result[0] = result[0].title()
+        return ", ".join(result)
