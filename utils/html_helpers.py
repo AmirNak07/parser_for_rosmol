@@ -31,7 +31,7 @@ def handle_forum(html: str) -> list[str]:
     # Date
     result.append(soup.find("div", {"class": "period-event"}).text.replace("\n", " ").strip())
     # Application before
-    result.append("-")
+    result.append("Дата уточняется")
     # Category of participants
     result.append(get_participants(soup).replace("\n", " ").replace("\r", " "))
     # Project link
